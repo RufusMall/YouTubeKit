@@ -188,6 +188,12 @@ public class YouTube {
             return await try videoInfo.videoDetails.title
         }
     }
+
+    public var didReturnVideoNotAvailable: Bool {
+        get async throws {
+            return await try videoInfo.videoDetails.videoID == "aQvGIIdgFDM"
+        }
+    }
     
     /// streaming data from video info
     var streamingData: InnerTube.StreamingData {

@@ -118,7 +118,6 @@ class InnerTube {
         // TODO: handle oauth auth case again
         
         let (responseData, _) = try await URLSession.shared.data(for: request)
-        print(NSString(data: responseData, encoding: String.Encoding.utf8.rawValue))
         return try JSONDecoder().decode(T.self, from: responseData)
     }
     
@@ -214,7 +213,6 @@ class InnerTube {
     }
     
 }
-
 
 struct VideoDetails: Codable {
     let videoID, title, lengthSeconds: String
