@@ -38,12 +38,6 @@ public class YouTube {
         URL(string: "https://www.youtube.com/embed/\(videoID)")!
     }
     
-    // stream monostate TODO
-    
-    private var author: String?
-    private var title: String?
-    private var publishDate: String?
-    
     let useOAuth: Bool
     let allowOAuthCache: Bool
     
@@ -186,6 +180,12 @@ public class YouTube {
             
             _fmtStreams = result
             return result
+        }
+    }
+
+    public var title: String {
+        get async throws {
+            return await try videoInfo.videoDetails.title
         }
     }
     

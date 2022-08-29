@@ -118,13 +118,14 @@ class InnerTube {
         // TODO: handle oauth auth case again
         
         let (responseData, _) = try await URLSession.shared.data(for: request)
-        
+        print(NSString(data: responseData, encoding: String.Encoding.utf8.rawValue))
         return try JSONDecoder().decode(T.self, from: responseData)
     }
     
     struct VideoInfo: Decodable {
         let playabilityStatus: PlayabilityStatus?
         let streamingData: StreamingData?
+        let videoDetails: VideoDetails
         
         struct PlayabilityStatus: Decodable {
             let status: String?
@@ -212,4 +213,24 @@ class InnerTube {
         return try await callAPI(endpoint: baseURL + "/get_transcript", query: query, object: baseData)
     }
     
+}
+
+
+struct VideoDetails: Codable {
+    let videoID, title, lengthSeconds: String
+    let keywords: [String]
+    let channelID: String
+    let isOwnerViewing: Bool
+    let shortDescription: String
+    let isCrawlable: Bool
+    let allowRatings: Bool
+    let viewCount, author: String
+    let isPrivate, isUnpluggedCorpus, isLiveContent: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case videoID = "videoId"
+        case title, lengthSeconds, keywords
+        case channelID = "channelId"
+        case isOwnerViewing, shortDescription, isCrawlable, allowRatings, viewCount, author, isPrivate, isUnpluggedCorpus, isLiveContent
+    }
 }
