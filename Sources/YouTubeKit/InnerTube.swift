@@ -216,7 +216,7 @@ class InnerTube {
 
 struct VideoDetails: Codable {
     let videoID, title, lengthSeconds: String
-    let keywords: [String]
+    let keywords: [String]?
     let channelID: String
     let isOwnerViewing: Bool
     let shortDescription: String
