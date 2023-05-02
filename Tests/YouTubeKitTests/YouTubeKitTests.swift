@@ -32,6 +32,8 @@ final class YouTubeKitTests: XCTestCase {
             let bestAudioStream = streams.filterAudioOnly().filter { $0.subtype == "mp4" }.highestAudioBitrateStream()
             print(bestAudioStream)
             
+            try await checkStreamReachability(bestAudioStream)
+            
             // test Cipher initialization directly (in case not lazily loaded)
             await XCTAssertNoThrow(try await Cipher(js: youtube.js), "Failed to initialize Cipher")
             
@@ -50,6 +52,8 @@ final class YouTubeKitTests: XCTestCase {
             //print(streams.filterAudioOnly().filter { $0.subtype == "mp4" }.highestAudioBitrateStream()?.url)
             print(streams.filterVideoOnly().highestResolutionStream())
             
+            try await checkStreamReachability(streams.filterVideoOnly().highestResolutionStream())
+            
             // test Cipher initialization directly (in case not lazily loaded)
             await XCTAssertNoThrow(try await Cipher(js: youtube.js), "Failed to initialize Cipher")
             
@@ -67,6 +71,28 @@ final class YouTubeKitTests: XCTestCase {
             print(streams.count)
             //print(streams.filterAudioOnly().filter { $0.subtype == "mp4" }.highestAudioBitrateStream()?.url)
             print(streams.filterVideoOnly().highestResolutionStream())
+            
+            try await checkStreamReachability(streams.filterVideoOnly().highestResolutionStream())
+            
+            // test Cipher initialization directly (in case not lazily loaded)
+            await XCTAssertNoThrow(try await Cipher(js: youtube.js), "Failed to initialize Cipher")
+            
+        } catch let error {
+            XCTFail("did throw error: \(error)")
+        }
+    }
+    
+    func testSampleVideo4() async {
+        let youtube = YouTube(videoID: "NOid0U6GxUA") // non-music video
+        do {
+            let streams = try await youtube.streams
+            XCTAssert(streams.count > 0)
+            print(streams)
+            print(streams.count)
+            //print(streams.filterAudioOnly().filter { $0.subtype == "mp4" }.highestAudioBitrateStream()?.url)
+            print(streams.filterVideoOnly().highestResolutionStream())
+            
+            try await checkStreamReachability(streams.filterVideoOnly().highestResolutionStream())
             
             // test Cipher initialization directly (in case not lazily loaded)
             await XCTAssertNoThrow(try await Cipher(js: youtube.js), "Failed to initialize Cipher")
@@ -102,6 +128,22 @@ final class YouTubeKitTests: XCTestCase {
             } catch {
                 XCTFail()
             }
+        }
+    }
+    
+    
+    
+    // MARK: - Helper Functions
+    
+    private func checkStreamReachability(_ stream: YouTubeKit.Stream?) async throws {
+        guard let stream else { return }
+        
+        var request = URLRequest(url: stream.url)
+        request.httpMethod = "head"
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse {
+            XCTAssertEqual(httpResponse.statusCode, 200, "Stream is not reachable (got status code \(httpResponse.statusCode))")
         }
     }
     
