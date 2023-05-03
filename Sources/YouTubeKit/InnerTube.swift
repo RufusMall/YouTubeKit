@@ -251,13 +251,13 @@ struct VideoDetails: Codable {
     let shortDescription: String
     let isCrawlable: Bool
     let allowRatings: Bool
-    let viewCount, author: String
+    let author: String
     let isPrivate, isUnpluggedCorpus, isLiveContent: Bool
 
     enum CodingKeys: String, CodingKey {
         case videoID = "videoId"
         case title, lengthSeconds, keywords
         case channelID = "channelId"
-        case isOwnerViewing, shortDescription, isCrawlable, allowRatings, viewCount, author, isPrivate, isUnpluggedCorpus, isLiveContent
+        case isOwnerViewing, shortDescription, isCrawlable, allowRatings, author, isPrivate, isUnpluggedCorpus, isLiveContent
     }
 }
