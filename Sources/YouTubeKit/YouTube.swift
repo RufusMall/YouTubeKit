@@ -86,7 +86,8 @@ public class YouTube {
     /// check whether the video is available
     public func checkAvailability() async throws {
         let (status, messages) = try Extraction.playabilityStatus(watchHTML: await watchHTML)
-        
+        let streamingData = try await videoInfo.streamingData
+
         for reason in messages {
             switch status {
             case .unplayable:
@@ -99,9 +100,9 @@ public class YouTube {
                 }
             case .error:
                 throw YouTubeKitError.videoUnavailable
-            case .liveStream:
+            case .liveStream where streamingData?.hlsManifestUrl == nil :
                 throw YouTubeKitError.liveStreamError
-            case .ok, .none:
+            case .ok, .none, .liveStream:
                 continue
             }
         }
@@ -195,6 +196,17 @@ public class YouTube {
         }
     }
     
+    /// Returns a list of live streams - currently only HLS supported
+    public var livestreams: [Livestream] {
+        get async throws {
+            var livestreams = [Livestream]()
+            if let hlsManifestUrl = try await streamingData.hlsManifestUrl.flatMap({ URL(string: $0) }) {
+                livestreams.append(Livestream(url: hlsManifestUrl, streamType: .hls))
+            }
+            return livestreams
+        }
+    }
+
     /// streaming data from video info
     var streamingData: InnerTube.StreamingData {
         get async throws {
