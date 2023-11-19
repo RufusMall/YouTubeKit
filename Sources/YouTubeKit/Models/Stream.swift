@@ -20,7 +20,7 @@ public struct Stream {
     public let bitrate: Int?
     public let averageBitrate: Int?
     public let isDash: Bool
-    
+    public let contentLength: Int?
     private let filesize: Int?
     
     init(format: InnerTube.StreamingData.Format) throws {
@@ -40,7 +40,7 @@ public struct Stream {
         self.bitrate = format.bitrate
         self.averageBitrate = format.averageBitrate
         self.filesize = format.contentLength.flatMap { Int($0) }
-        
+        self.contentLength = format.contentLength.flatMap { Int($0) }
         self.isDash = itag.isDash
     }
     

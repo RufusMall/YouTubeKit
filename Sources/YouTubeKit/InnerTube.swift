@@ -251,7 +251,7 @@ struct VideoDetails: Codable {
     let keywords: [String]?
     let channelID: String
     let isOwnerViewing: Bool
-    let shortDescription: String
+    let shortDescription: String?
     let isCrawlable: Bool
     let allowRatings: Bool
     let author: String
