@@ -187,15 +187,24 @@ public class YouTube {
         }
     }
 
+    private var videoDetails: VideoDetails {
+        get async throws {
+            guard let videoDetails = try await videoInfo.videoDetails else {
+                throw YouTubeKitError.videoDetailsNotAvailable
+            }
+            return videoDetails
+        }
+    }
+
     public var title: String {
         get async throws {
-            return await try videoInfo.videoDetails.title
+            return try await videoDetails.title
         }
     }
 
     public var didReturnVideoNotAvailable: Bool {
         get async throws {
-            return await try videoInfo.videoDetails.videoID == "aQvGIIdgFDM"
+            return try await videoDetails.videoID == "aQvGIIdgFDM"
         }
     }
     

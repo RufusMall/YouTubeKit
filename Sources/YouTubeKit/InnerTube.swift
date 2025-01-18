@@ -141,7 +141,7 @@ class InnerTube {
     struct VideoInfo: Decodable {
         let playabilityStatus: PlayabilityStatus?
         let streamingData: StreamingData?
-        let videoDetails: VideoDetails
+        let videoDetails: VideoDetails?
         
         struct PlayabilityStatus: Decodable {
             let status: String?
