@@ -272,15 +272,6 @@ public class YouTube {
         }
     }
 
-//    private var videoDetails: InnerTube.VideoInfo.VideoDetails {
-//        get async throws {
-//            guard let videoDetails = try await self.videoInfo.videoDetails else {
-//                throw YouTubeKitError.videoDetailsNotAvailable
-//            }
-//            return videoDetails
-//        }
-//    }
-
     public var title: String {
         get async throws {
             return try await videoDetails.title
@@ -330,35 +321,6 @@ public class YouTube {
             } else {
                 throw YouTubeKitError.extractError
             }
-
-//            let innertubeClients: [InnerTube.ClientType] = [.iosMusic, .ios, .android]
-//
-//            var lastResponse: InnerTube.VideoInfo? = nil
-//            var lastError: any Error = YouTubeKitError.extractError
-//            
-//            for client in innertubeClients {
-//                do {
-//                    let innertube = InnerTube(client: client, useOAuth: useOAuth, allowCache: allowOAuthCache)
-//                    
-//                    let innertubeResponse = try await innertube.player(videoID: videoID)
-//                    _videoInfo = innertubeResponse
-//                    lastResponse = innertubeResponse
-//                    
-//                    if innertubeResponse.streamingData != nil {
-//                        return innertubeResponse
-//                    } else {
-//                        os_log("Insufficient player response with %{public}@", log: log, type: .debug, client.rawValue)
-//                    }
-//                } catch let error {
-//                    os_log("Failed to retrieve player response with %{public}@: %{public}@", log: log, type: .debug, client.rawValue, error.localizedDescription)
-//                    lastError = error
-//                }
-//            }
-//            
-//            if let lastResponse {
-//                return lastResponse
-//            }
-//            throw lastError
         }
     }
     

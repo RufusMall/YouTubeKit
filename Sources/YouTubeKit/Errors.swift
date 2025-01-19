@@ -19,7 +19,6 @@ public enum YouTubeKitError: String, Error {
     case recordingUnavailable
     case membersOnly
     case videoRegionBlocked
-    case videoDetailsNotAvailable
 }
 
 extension YouTubeKitError: LocalizedError {
