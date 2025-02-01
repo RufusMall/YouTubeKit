@@ -29,6 +29,7 @@ public class YouTube {
     private var playerConfigArgs: [String: Any]?
     private var _ageRestricted: Bool?
     private var _signatureTimestamp: Int?
+    private var _ytcfg: Extraction.YtCfg?
     
     private var _fmtStreams: [Stream]?
     
@@ -200,6 +201,17 @@ public class YouTube {
         }
     }
     
+    var ytcfg: Extraction.YtCfg {
+        get async throws {
+            if let cached = _ytcfg {
+                return cached
+            }
+            
+            _ytcfg = try await Extraction.extractYtCfg(from: watchHTML)
+            return _ytcfg!
+        }
+    }
+    
     /// Interface to query both adaptive (DASH) and progressive streams.
     /// Returns a list of streams if they have been initialized.
     /// If the streams have not been initialized, finds all relevant streams and initializes them.
@@ -314,13 +326,9 @@ public class YouTube {
     }
 
     /// Video details from video info.
-    var videoDetails: InnerTube.VideoInfo.VideoDetails {
+    var videoDetails: [InnerTube.VideoInfo.VideoDetails] {
         get async throws {
-            if let videoDetails = try await videoInfos.lazy.compactMap({ $0.videoDetails }).first {
-                return videoDetails
-            } else {
-                throw YouTubeKitError.extractError
-            }
+            try await videoInfos.compactMap { $0.videoDetails }
         }
     }
     
@@ -333,7 +341,7 @@ public class YouTube {
             // try extracting video infos from watch html directly as well
             let watchVideoInfoTask = Task<InnerTube.VideoInfo?, Never> { [log] in
                 do {
-                    return try await Extraction.getVideoInfo(fromHTML: watchHTML)
+                    return nil //try await Extraction.getVideoInfo(fromHTML: watchHTML)  // (temporarily disabled)
                 } catch let error {
                     os_log("Couldn't extract video info from main watch html: %{public}@", log: log, type: .debug, error.localizedDescription)
                     return nil
@@ -341,11 +349,12 @@ public class YouTube {
             }
 
             let signatureTimestamp = try await signatureTimestamp
+            let ytcfg = try await ytcfg
             
-            let innertubeClients: [InnerTube.ClientType] = [.ios, .mWeb]
+            let innertubeClients: [InnerTube.ClientType] = [.tv, .ios, .web]
             
             let results: [Result<InnerTube.VideoInfo, Error>] = await innertubeClients.concurrentMap { [videoID, useOAuth, allowOAuthCache] client in
-                let innertube = InnerTube(client: client, signatureTimestamp: signatureTimestamp, useOAuth: useOAuth, allowCache: allowOAuthCache)
+                let innertube = InnerTube(client: client, signatureTimestamp: signatureTimestamp, ytcfg: ytcfg, useOAuth: useOAuth, allowCache: allowOAuthCache)
                 
                 do {
                     let innertubeResponse = try await innertube.player(videoID: videoID)
@@ -389,7 +398,8 @@ public class YouTube {
     
     private func loadAdditionalVideoInfos(forClient client: InnerTube.ClientType) async throws -> InnerTube.VideoInfo {
         let signatureTimestamp = try await signatureTimestamp
-        let innertube = InnerTube(client: client, signatureTimestamp: signatureTimestamp, useOAuth: useOAuth, allowCache: allowOAuthCache)
+        let ytcfg = try await ytcfg
+        let innertube = InnerTube(client: client, signatureTimestamp: signatureTimestamp, ytcfg: ytcfg, useOAuth: useOAuth, allowCache: allowOAuthCache)
         let videoInfo = try await innertube.player(videoID: videoID)
         
         // ignore if incorrect videoID
@@ -403,7 +413,8 @@ public class YouTube {
     
     private func bypassAgeGate() async throws {
         let signatureTimestamp = try await signatureTimestamp
-        let innertube = InnerTube(client: .tvEmbed, signatureTimestamp: signatureTimestamp, useOAuth: useOAuth, allowCache: allowOAuthCache)
+        let ytcfg = try await ytcfg
+        let innertube = InnerTube(client: .tvEmbed, signatureTimestamp: signatureTimestamp, ytcfg: ytcfg, useOAuth: useOAuth, allowCache: allowOAuthCache)
         let innertubeResponse = try await innertube.player(videoID: videoID)
         
         if innertubeResponse.playabilityStatus?.status == "UNPLAYABLE" || innertubeResponse.playabilityStatus?.status == "LOGIN_REQUIRED" {
