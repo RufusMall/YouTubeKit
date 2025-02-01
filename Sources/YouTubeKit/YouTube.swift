@@ -286,13 +286,13 @@ public class YouTube {
 
     public var title: String {
         get async throws {
-            return try await videoDetails.title
+            return try await videoDetails.compactMap(\.title).first ?? "title unavailable"
         }
     }
 
     public var didReturnVideoNotAvailable: Bool {
         get async throws {
-            return try await videoDetails.videoId == "aQvGIIdgFDM"
+            return try await videoDetails.compactMap(\.videoId).first == "aQvGIIdgFDM"
         }
     }
     
